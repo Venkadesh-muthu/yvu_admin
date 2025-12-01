@@ -8,20 +8,23 @@ class ServiceController extends BaseController
 {
     public function sendRequest()
     {
-        // Get POST data
         $service    = $this->request->getPost('service');
+        $date       = $this->request->getPost('date');
+        $time_from  = $this->request->getPost('time_from');
+        $time_to    = $this->request->getPost('time_to');
+        $venue      = $this->request->getPost('venue');
+
         $name       = $this->request->getPost('name');
         $email      = $this->request->getPost('email');
         $mobile     = $this->request->getPost('mobile');
         $department = $this->request->getPost('department');
 
-        // Validation
-        if (!$service || !$name || !$email || !$mobile || !$department) {
+        if (!$service || !$date || !$time_from || !$time_to || !$venue ||
+            !$name || !$email || !$mobile || !$department) {
             return $this->response->setStatusCode(400)
-                                  ->setJSON(['status' => false, 'message' => 'Missing fields']);
+                ->setJSON(['status' => false, 'message' => 'Missing fields']);
         }
 
-        // Email settings
         $emailService = \Config\Services::email();
 
         $to = "services@yvu.edu.in";
@@ -31,30 +34,36 @@ class ServiceController extends BaseController
             <h2>SERVICE REQUEST</h2>
 
             <p><strong>Service:</strong> $service</p>
+            <p><strong>Date:</strong> $date</p>
+            <p><strong>Time From:</strong> $time_from</p>
+            <p><strong>Time To:</strong> $time_to</p>
+            <p><strong>Venue:</strong> $venue</p>
+
+            <hr>
+
             <p><strong>Name:</strong> $name</p>
             <p><strong>Email:</strong> $email</p>
             <p><strong>Mobile:</strong> $mobile</p>
             <p><strong>Department:</strong> $department</p>
         ";
 
-        // Set email data
         $emailService->setTo($to);
-        $emailService->setFrom($email); // better for SMTP
-        $emailService->setReplyTo($email, $name); // user's email
+        $emailService->setFrom($email);
+        $emailService->setReplyTo($email, $name);
         $emailService->setSubject($subject);
         $emailService->setMessage($message);
 
-        // Try sending email
         if ($emailService->send()) {
-            return $this->response->setStatusCode(200)
-                                  ->setJSON(['status' => true, 'message' => 'Request sent successfully!']);
+            return $this->response->setJSON([
+                'status' => true,
+                'message' => 'Request sent successfully!'
+            ]);
         } else {
-            return $this->response->setStatusCode(500)
-                                  ->setJSON([
-                                      'status' => false,
-                                      'message' => 'Email sending failed!',
-                                      'error' => $emailService->printDebugger(['headers'])
-                                  ]);
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Email sending failed!',
+                'error' => $emailService->printDebugger(['headers'])
+            ]);
         }
     }
 }
