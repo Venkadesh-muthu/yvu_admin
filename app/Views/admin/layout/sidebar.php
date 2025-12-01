@@ -1,4 +1,6 @@
 <?php $uri = service('uri'); ?>
+<?php $role = session()->get('admin_role'); // 'admin' or 'newsadmin'?>
+
 <nav id="sidebar"
     class="offcanvas offcanvas-start d-lg-block border-end shadow-sm yvu-sidebar"
     tabindex="-1" aria-labelledby="sidebarLabel"
@@ -18,8 +20,10 @@
             <img src="<?= base_url('admin-template/assets/yvu150a.gif') ?>"
                 class="rounded-circle border border-3 border-light mb-2 shadow-sm"
                 width="80" height="80" alt="Admin">
-            <h5 class="fw-bold mb-0">YVU <?= session()->get('adminUser')['username'] ?? 'Admin' ?></h5>
-            <small class="text-light opacity-75">Administrator</small>
+            <h5 class="fw-bold mb-0"><?= session()->get('admin_name') ?? 'Admin' ?></h5>
+            <small class="text-light opacity-75">
+                <?= $role === 'admin' ? 'Administrator' : 'News Admin' ?>
+            </small>
         </div>
 
         <!-- 📋 Sidebar Menu -->
@@ -31,22 +35,22 @@
                 </a>
             </li>
 
-           <li class="nav-item p-2">
-                <a href="<?= base_url('updates') ?>"
-                    class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'updates' ? 'active-link' : '' ?>">
-                    <i class="bi bi-arrow-repeat me-2 fs-5"></i> Updates
-                </a>
-            </li>
-
-
-            <li class="nav-item p-2">
-                <a href="<?= base_url('newspapers') ?>"
-                    class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'newspapers' ? 'active-link' : '' ?>">
-                    <i class="bi bi-file-earmark-text me-2 fs-5"></i> Newspapers
-                </a>
-            </li>
+            <?php if ($role === 'admin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('updates') ?>"
+                        class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'updates' ? 'active-link' : '' ?>">
+                        <i class="bi bi-arrow-repeat me-2 fs-5"></i> Updates
+                    </a>
+                </li>
+            <?php elseif ($role === 'newsadmin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('newspapers') ?>"
+                        class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'newspapers' ? 'active-link' : '' ?>">
+                        <i class="bi bi-file-earmark-text me-2 fs-5"></i> Newspapers
+                    </a>
+                </li>
+            <?php endif; ?>
         </ul>
-
 
         <!-- 🔒 Logout -->
         <div class="mt-auto border-top py-3 px-4">

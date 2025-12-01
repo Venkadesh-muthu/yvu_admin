@@ -7,15 +7,23 @@
       </a>
     </div>
 
+    <!-- 🔴 Validation Errors -->
+    <?php if (isset($validation)): ?>
+      <div class="alert alert-danger">
+          <?= $validation->listErrors() ?>
+      </div>
+    <?php endif; ?>
+
     <form 
       action="<?= base_url('newspapers/edit/' . $newspaper['id']) ?>"
       method="post" enctype="multipart/form-data" class="card shadow-sm p-4">
 
       <?= csrf_field() ?>
 
+      <!-- 🔹 File Upload -->
       <div class="mb-3">
         <label for="attachments" class="form-label fw-semibold">
-          Upload New Files (PDF, DOCX, XLSX, etc.)
+          Upload New Files (PDF, DOCX, XLSX, Images, etc.)
         </label>
         <input type="file" name="documents[]" id="attachments" multiple class="form-control">
 
@@ -42,9 +50,43 @@
         <?php endif; ?>
       </div>
 
+      <!-- 🔹 Start Date -->
+      <div class="mb-3">
+        <label for="start_date" class="form-label fw-semibold">
+          Start Date <span class="text-danger">*</span>
+        </label>
+        <input type="date" name="start_date" id="start_date" 
+               value="<?= set_value('start_date', $newspaper['start_date'] ?? '') ?>"
+               class="form-control" required>
+      </div>
+
+      <!-- 🔹 End Date -->
+      <div class="mb-3">
+        <label for="end_date" class="form-label fw-semibold">
+          End Date <span class="text-danger">*</span>
+        </label>
+        <input type="date" name="end_date" id="end_date" 
+               value="<?= set_value('end_date', $newspaper['end_date'] ?? '') ?>"
+               class="form-control" required>
+      </div>
+
       <div class="text-end">
         <button type="submit" class="btn btn-primary">Update Newspaper</button>
       </div>
     </form>
   </div>
 </main>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startInput = document.getElementById('start_date');
+    const endInput = document.getElementById('end_date');
+
+    startInput.addEventListener('change', function() {
+        const startDate = this.value;
+        endInput.min = startDate; // End date cannot be before start date
+        if (endInput.value < startDate) {
+            endInput.value = startDate; // Auto-update end date if invalid
+        }
+    });
+});
+</script>

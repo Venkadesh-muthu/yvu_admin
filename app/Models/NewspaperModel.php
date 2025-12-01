@@ -9,7 +9,14 @@ class NewspaperModel extends Model
     protected $table = 'newspapers'; // your table name
     protected $primaryKey = 'id';
 
-    protected $allowedFields = ['documents', 'created_at', 'updated_at'];
+    // Add start_date and end_date here
+    protected $allowedFields = [
+        'documents',
+        'start_date',
+        'end_date',
+        'created_at',
+        'updated_at'
+    ];
 
     protected $useTimestamps = true; // automatically manage created_at & updated_at
     protected $createdField  = 'created_at';
