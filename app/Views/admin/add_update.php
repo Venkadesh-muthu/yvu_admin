@@ -6,7 +6,6 @@
         <i class="bi bi-arrow-left"></i> Back
       </a>
     </div>
-
     <!-- 🔴 Validation Error Messages -->
     <?php if (isset($validation)): ?>
       <div class="alert alert-danger">
