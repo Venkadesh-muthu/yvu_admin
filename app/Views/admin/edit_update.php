@@ -6,7 +6,19 @@
         <i class="bi bi-arrow-left"></i> Back
       </a>
     </div>
+     <!-- 🔴 Validation Error Messages -->
+    <?php if (isset($validation)): ?>
+      <div class="alert alert-danger">
+        <?= $validation->listErrors() ?>
+      </div>
+    <?php endif; ?>
 
+    <!-- ✅ Success Message -->
+    <?php if (session()->has('success')): ?>
+      <div class="alert alert-success">
+        <?= esc(session('success')) ?>
+      </div>
+    <?php endif; ?>
     <form 
       action="<?= base_url('updates/edit/' . $update['id']) ?>" 
       method="post" 
@@ -46,7 +58,30 @@
           <option value="Downloads" <?= ($update['type'] == 'Downloads') ? 'selected' : '' ?>>Downloads</option>
         </select>
       </div>
+      <!-- Start Date -->
+      <div class="mb-3">
+        <label for="start_date" class="form-label fw-semibold">Start Date</label>
+        <input 
+          type="date" 
+          name="start_date" 
+          id="start_date" 
+          class="form-control"
+          required
+          value="<?= esc($update['start_date']) ?>">
+      </div>
 
+      <!-- End Date -->
+      <div class="mb-3">
+        <label for="end_date" class="form-label fw-semibold">End Date</label>
+        <input 
+          type="date" 
+          name="end_date" 
+          id="end_date" 
+          class="form-control"
+          required
+          min="<?= esc($update['start_date']) ?>"
+          value="<?= esc($update['end_date']) ?>">
+      </div>
       <!-- File Upload -->
       <div class="mb-3">
         <label for="attachments" class="form-label fw-semibold">
@@ -93,3 +128,18 @@
     </form>
   </div>
 </main>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startInput = document.getElementById('start_date');
+    const endInput = document.getElementById('end_date');
+
+    startInput.addEventListener('change', function() {
+        const startDate = this.value;
+        endInput.min = startDate; // End date cannot be earlier
+
+        if (endInput.value < startDate) {
+            endInput.value = startDate; // Auto-fix invalid end date
+        }
+    });
+});
+</script>

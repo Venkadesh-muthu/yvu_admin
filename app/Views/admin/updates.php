@@ -20,9 +20,11 @@
             <th width="5%">#</th>
             <th>Title</th>
             <th>Type</th>
-            <th>Created At</th>
             <th>Attachments</th>
-            <th width="15%">Actions</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Created At</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -50,16 +52,6 @@
                   <?php endif; ?>
                 </td>
                 <td>
-                    <?php if (!empty($u['updated_at'])): ?>
-                        <span class="text-primary">
-                            Updated: <?= date('d M Y', strtotime($u['updated_at'])) ?>
-                        </span>
-                    <?php else: ?>
-                        <?= date('d M Y', strtotime($u['created_at'])) ?>
-                    <?php endif; ?>
-                </td>
-
-                <td>
                   <?php
                     $files = json_decode($u['documents'], true);
                 if (!empty($files)):
@@ -73,6 +65,27 @@
                 else: ?>
                         <em>No files</em>
                   <?php endif; ?>
+                </td>
+                 <td>
+                  <?= (!empty($u['start_date']))
+                ? date('d M Y', strtotime($u['start_date']))
+                : '<em>Not set</em>' ?>
+                </td>
+
+                <!-- ✅ END DATE -->
+                <td>
+                  <?= (!empty($u['end_date']))
+                ? date('d M Y', strtotime($u['end_date']))
+                : '<em>Not set</em>' ?>
+                </td>
+                <td>
+                    <?php if (!empty($u['updated_at'])): ?>
+                        <span class="text-primary">
+                            Updated: <?= date('d M Y', strtotime($u['updated_at'])) ?>
+                        </span>
+                    <?php else: ?>
+                        <?= date('d M Y', strtotime($u['created_at'])) ?>
+                    <?php endif; ?>
                 </td>
                 <td>
                   <a href="<?= base_url('updates/edit/' . $u['id']) ?>" class="btn btn-sm btn-warning">

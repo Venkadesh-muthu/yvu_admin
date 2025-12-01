@@ -42,7 +42,30 @@
           required
           placeholder="Enter update heading">
       </div>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">
+          Start Date <span class="text-danger">*</span>
+        </label>
+        <input 
+          id="start_date"
+          type="date" 
+          name="start_date" 
+          class="form-control" 
+          required>
+      </div>
 
+      <!-- End Date -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">
+          End Date <span class="text-danger">*</span>
+        </label>
+        <input 
+          id="end_date"
+          type="date" 
+          name="end_date" 
+          class="form-control" 
+          required>
+      </div>
       <!-- Type -->
       <div class="mb-3">
         <label for="type" class="form-label fw-semibold">
@@ -82,3 +105,18 @@
     </form>
   </div>
 </main>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startInput = document.getElementById('start_date');
+    const endInput = document.getElementById('end_date');
+
+    startInput.addEventListener('change', function() {
+        const startDate = this.value;
+        endInput.min = startDate; // End date cannot be earlier
+
+        if (endInput.value < startDate) {
+            endInput.value = startDate; // Auto-fix invalid end date
+        }
+    });
+});
+</script>

@@ -8,5 +8,15 @@ class UpdateModel extends Model
 {
     protected $table = 'updates';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['heading', 'type', 'documents', 'created_at', 'updated_at'];
+
+    // Add start_date and end_date also
+    protected $allowedFields = [
+        'heading',
+        'type',
+        'documents',
+        'start_date',
+        'end_date',
+        'created_at',
+        'updated_at'
+    ];
 }

@@ -128,15 +128,18 @@ class AdminController extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
+
             $rules = [
-                'heading' => 'required',
-                'type' => 'required',
+                'heading'     => 'required',
+                'type'        => 'required',
+                'start_date'  => 'required|valid_date[Y-m-d]',
+                'end_date'    => 'required|valid_date[Y-m-d]',
                 'documents' => [
                     'rules' => 'uploaded[documents]|max_size[documents,10240]|ext_in[documents,pdf,doc,docx,xls,xlsx]',
                     'errors' => [
                         'uploaded' => 'Please upload at least one document.',
                         'max_size' => 'Each file must be less than 10MB.',
-                        'ext_in' => 'Only PDF, DOC, DOCX, XLS, XLSX files are allowed.'
+                        'ext_in'   => 'Only PDF, DOC, DOCX, XLS, XLSX files are allowed.'
                     ]
                 ]
             ];
@@ -155,7 +158,7 @@ class AdminController extends BaseController
             if (isset($uploadedFiles['documents'])) {
                 foreach ($uploadedFiles['documents'] as $file) {
                     if ($file->isValid() && !$file->hasMoved()) {
-                        $newName = $file->getClientName(); // keep original filename
+                        $newName = $file->getClientName();
                         $file->move(FCPATH . 'uploads/updates/', $newName);
                         $fileNames[] = $newName;
                     }
@@ -163,9 +166,11 @@ class AdminController extends BaseController
             }
 
             $this->updateModel->set([
-                'heading'   => $this->request->getPost('heading'),
-                'type'      => $this->request->getPost('type'),
-                'documents' => json_encode($fileNames)
+                'heading'     => $this->request->getPost('heading'),
+                'type'        => $this->request->getPost('type'),
+                'start_date'  => $this->request->getPost('start_date'),
+                'end_date'    => $this->request->getPost('end_date'),
+                'documents'   => json_encode($fileNames)
             ])
             ->set('created_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
             ->insert();
@@ -178,6 +183,7 @@ class AdminController extends BaseController
             'content' => 'admin/add_update'
         ]);
     }
+
 
 
     public function editUpdate($id)
@@ -193,9 +199,12 @@ class AdminController extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
+
             $rules = [
-                'heading' => 'required',
-                'type'    => 'required'
+                'heading'     => 'required',
+                'type'        => 'required',
+                'start_date'  => 'required|valid_date[Y-m-d]',
+                'end_date'    => 'required|valid_date[Y-m-d]',
             ];
 
             if (!$this->validate($rules)) {
@@ -224,26 +233,26 @@ class AdminController extends BaseController
             $mergedDocs = array_merge($existingDocs, $newFiles);
 
             $this->updateModel->set([
-                'heading'   => $this->request->getPost('heading'),
-                'type'      => $this->request->getPost('type'),
-                'documents' => json_encode($mergedDocs)
+                'heading'     => $this->request->getPost('heading'),
+                'type'        => $this->request->getPost('type'),
+                'start_date'  => $this->request->getPost('start_date'),
+                'end_date'    => $this->request->getPost('end_date'),
+                'documents'   => json_encode($mergedDocs)
             ])
             ->set('updated_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
             ->where('id', $id)
             ->update();
 
-
             return redirect()->to('/updates')->with('success', 'Update modified successfully.');
         }
 
-        $data = [
+        return view('admin/layout/templates', [
             'title'   => 'Edit Update',
             'update'  => $update,
             'content' => 'admin/edit_update'
-        ];
-
-        return view('admin/layout/templates', $data);
+        ]);
     }
+
 
 
     public function deleteFile($id, $index)
