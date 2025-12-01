@@ -19,6 +19,8 @@
           <tr>
             <th width="5%">#</th>
             <th>Attachments</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Created At</th>
             <th width="15%">Actions</th>
           </tr>
@@ -50,6 +52,8 @@
                         <em>No files</em>
                   <?php endif; ?>
                 </td>
+                <td><?= !empty($n['start_date']) ? date('d M Y', strtotime($n['start_date'])) : '-' ?></td>
+                <td><?= !empty($n['end_date']) ? date('d M Y', strtotime($n['end_date'])) : '-' ?></td>
                 <td>
                     <?php if (!empty($n['updated_at'])): ?>
                         <span>

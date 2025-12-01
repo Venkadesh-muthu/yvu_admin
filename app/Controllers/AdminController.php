@@ -55,11 +55,14 @@ class AdminController extends BaseController
             $session->set([
                 'isAdminLoggedIn' => true,
                 'admin_id' => $user['id'],
-                'admin_name' => $user['name'] ?? 'Admin'
+                'admin_name' => $user['username'],
+                'admin_email' => $user['email'],
+                'admin_role' => $user['username'] === 'Admin' ? 'admin' : 'newsadmin'
             ]);
-
             return redirect()->to('/dashboard');
         }
+
+
 
         return redirect()->back()->with('error', 'Invalid email or password');
     }
@@ -333,6 +336,8 @@ class AdminController extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
+
+            // Validation rules
             $rules = [
                 'documents' => [
                     'rules' => 'uploaded[documents]|max_size[documents,10240]',
@@ -340,11 +345,23 @@ class AdminController extends BaseController
                         'uploaded' => 'Please upload at least one document.',
                         'max_size' => 'Each file must be less than 10MB.'
                     ]
-                ]
+                ],
+                'start_date' => 'required|valid_date[Y-m-d]',
+                'end_date'   => 'required|valid_date[Y-m-d]'
             ];
 
+            // Custom error messages
+            $errors = [
+                'end_date' => [
+                    'rules' => 'required|valid_date[Y-m-d]|end_date_check',
+                    'errors' => [
+                        'end_date_check' => 'End Date must be equal or after Start Date.'
+                    ]
+                ]
 
-            if (!$this->validate($rules)) {
+            ];
+
+            if (!$this->validate($rules, $errors)) {
                 return view('admin/layout/templates', [
                     'title' => 'Add Newspaper',
                     'content' => 'admin/add_newspaper',
@@ -352,6 +369,7 @@ class AdminController extends BaseController
                 ]);
             }
 
+            // Handle file uploads
             $uploadedFiles = $this->request->getFiles();
             $fileNames = [];
 
@@ -365,11 +383,13 @@ class AdminController extends BaseController
                 }
             }
 
+            // Save to database
             $this->newspaperModel
-            ->set('documents', json_encode($fileNames))
-            ->set('created_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
-            ->insert();
-
+                ->set('documents', json_encode($fileNames))
+                ->set('start_date', $this->request->getPost('start_date'))
+                ->set('end_date', $this->request->getPost('end_date'))
+                ->set('created_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
+                ->insert();
 
             return redirect()->to('/newspapers')->with('success', 'Newspaper uploaded successfully.');
         }
@@ -379,6 +399,7 @@ class AdminController extends BaseController
             'content' => 'admin/add_newspaper'
         ]);
     }
+
     public function editNewspaper($id)
     {
         if ($redirect = $this->checkLogin()) {
@@ -391,6 +412,39 @@ class AdminController extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
+
+            // Validation rules
+            $rules = [
+                'documents' => [
+                    'rules' => 'max_size[documents,10240]',
+                    'errors' => [
+                        'max_size' => 'Each file must be less than 10MB.'
+                    ]
+                ],
+                'start_date' => 'required|valid_date[Y-m-d]',
+                'end_date'   => 'required|valid_date[Y-m-d]'
+            ];
+
+            $errors = [
+               'end_date' => [
+                    'rules' => 'required|valid_date[Y-m-d]|end_date_check',
+                    'errors' => [
+                        'end_date_check' => 'End Date must be equal or after Start Date.'
+                    ]
+                ]
+
+            ];
+
+            if (!$this->validate($rules, $errors)) {
+                return view('admin/layout/templates', [
+                    'title' => 'Edit Newspaper',
+                    'content' => 'admin/edit_newspaper',
+                    'newspaper' => $newspaper,
+                    'validation' => $this->validator
+                ]);
+            }
+
+            // Handle file uploads
             $uploadedFiles = $this->request->getFiles();
             $existingDocs = json_decode($newspaper['documents'], true) ?? [];
             $newFiles = [];
@@ -407,24 +461,25 @@ class AdminController extends BaseController
 
             $mergedDocs = array_merge($existingDocs, $newFiles);
 
+            // Update database
             $this->newspaperModel
-            ->set('documents', json_encode($mergedDocs))
-            ->set('updated_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
-            ->where('id', $id)
-            ->update();
-
+                ->set('documents', json_encode($mergedDocs))
+                ->set('start_date', $this->request->getPost('start_date'))
+                ->set('end_date', $this->request->getPost('end_date'))
+                ->set('updated_at', 'CONVERT_TZ(NOW(), "SYSTEM", "+05:30")', false)
+                ->where('id', $id)
+                ->update();
 
             return redirect()->to('/newspapers')->with('success', 'Newspaper updated successfully.');
         }
 
-        $data = [
+        return view('admin/layout/templates', [
             'title' => 'Edit Newspaper',
             'newspaper' => $newspaper,
             'content' => 'admin/edit_newspaper'
-        ];
-
-        return view('admin/layout/templates', $data);
+        ]);
     }
+
     public function deleteNewspaperFile($id, $index)
     {
         $newspaper = $this->newspaperModel->find($id);
@@ -475,7 +530,6 @@ class AdminController extends BaseController
 
         return redirect()->to('/newspapers')->with('success', 'Newspaper deleted successfully.');
     }
-
     // --------------------------------
     // 🛡️ LOGIN CHECK
     // --------------------------------
