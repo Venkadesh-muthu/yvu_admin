@@ -53,7 +53,7 @@
           <option value="Notifications">Notifications</option>
           <option value="Forms">Forms</option>
           <option value="Circulars">Circulars</option>
-          <option value="Results">Results</option>
+          <option value="Exams">Exams</option>
           <option value="Latest Info">Latest Info</option>
           <option value="Tenders">Tenders</option>
           <option value="Events">Events</option>

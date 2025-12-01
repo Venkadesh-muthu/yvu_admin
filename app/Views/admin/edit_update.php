@@ -39,7 +39,7 @@
           <option value="Notifications" <?= ($update['type'] == 'Notifications') ? 'selected' : '' ?>>Notifications</option>
           <option value="Forms" <?= ($update['type'] == 'Forms') ? 'selected' : '' ?>>Forms</option>
           <option value="Circulars" <?= ($update['type'] == 'Circulars') ? 'selected' : '' ?>>Circulars</option>
-          <option value="Results" <?= ($update['type'] == 'Results') ? 'selected' : '' ?>>Results</option>
+          <option value="Exams" <?= ($update['type'] == 'Exams') ? 'selected' : '' ?>>Exams</option>
           <option value="Latest Info" <?= ($update['type'] == 'Latest Info') ? 'selected' : '' ?>>Latest Info</option>
           <option value="Tenders" <?= ($update['type'] == 'Tenders') ? 'selected' : '' ?>>Tenders</option>
           <option value="Events" <?= ($update['type'] == 'Events') ? 'selected' : '' ?>>Events</option>
