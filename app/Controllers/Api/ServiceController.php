@@ -9,9 +9,14 @@ class ServiceController extends BaseController
     public function sendRequest()
     {
         $service    = $this->request->getPost('service');
-        $date       = $this->request->getPost('date');
-        $time_from  = $this->request->getPost('time_from');
-        $time_to    = $this->request->getPost('time_to');
+        $dateInput  = $this->request->getPost('date');
+        $date       = date("d-m-Y", strtotime($dateInput)); // 02-12-2025
+
+        $timeFromInput = $this->request->getPost('time_from');
+        $timeToInput   = $this->request->getPost('time_to');
+
+        $time_from = date("h:i A", strtotime($timeFromInput)); // 02:30 PM
+        $time_to   = date("h:i A", strtotime($timeToInput));   // 11:00 AM
         $venue      = $this->request->getPost('venue');
 
         $name       = $this->request->getPost('name');
