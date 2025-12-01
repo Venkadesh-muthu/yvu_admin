@@ -21,7 +21,12 @@ class NewspaperController extends BaseController
     // ✅ Fetch all newspapers
     public function getNewspapers()
     {
+        $today = date('Y-m-d');
+
+        // Fetch with date filter including NULL dates
         $newspapers = $this->newspaperModel
+            ->where("(start_date IS NULL OR start_date <= '$today')")
+            ->where("(end_date IS NULL OR end_date >= '$today')")
             ->orderBy('id', 'DESC')
             ->findAll();
 
@@ -35,8 +40,10 @@ class NewspaperController extends BaseController
             }
 
             return [
-                'id'        => $item['id'],
-                'documents' => $fileUrls,
+                'id'         => $item['id'],
+                'documents'  => $fileUrls,
+                'start_date' => $item['start_date'] ?? null,
+                'end_date'   => $item['end_date'] ?? null,
                 'created_at' => $item['created_at'] ?? null,
                 'updated_at' => $item['updated_at'] ?? null,
             ];
@@ -47,6 +54,7 @@ class NewspaperController extends BaseController
             'data'   => $newspapers
         ]);
     }
+
 
     // ✅ Fetch a single newspaper by ID
     public function getNewspaper($id)

@@ -20,11 +20,16 @@ class UpdateController extends BaseController
     // ✅ Fetch all updates
     public function getUpdates()
     {
+        $today = date('Y-m-d');
+
+        // Fetch updates with start/end date filter including NULL values
         $updates = $this->updateModel
+            ->where("(start_date IS NULL OR start_date <= '$today')")
+            ->where("(end_date IS NULL OR end_date >= '$today')")
             ->orderBy('id', 'DESC')
             ->findAll();
 
-        // Format document URLs for API
+        // Format document URLs
         $updates = array_map(function ($item) {
             $files = json_decode($item['documents'] ?? '[]', true);
             $fileUrls = [];
@@ -36,8 +41,10 @@ class UpdateController extends BaseController
             return [
                 'id'         => $item['id'],
                 'heading'    => $item['heading'],
-                'type'       => $item['type'] ?? null, // ✅ include type field
+                'type'       => $item['type'] ?? null,
                 'documents'  => $fileUrls,
+                'start_date' => $item['start_date'] ?? null,
+                'end_date'   => $item['end_date'] ?? null,
                 'created_at' => $item['created_at'] ?? null,
                 'updated_at' => $item['updated_at'] ?? null,
             ];
@@ -48,6 +55,7 @@ class UpdateController extends BaseController
             'data'   => $updates
         ]);
     }
+
 
     // ✅ Fetch a single update by ID
     public function getUpdate($id)
