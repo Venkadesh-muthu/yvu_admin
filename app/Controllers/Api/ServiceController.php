@@ -32,7 +32,7 @@ class ServiceController extends BaseController
 
         $emailService = \Config\Services::email();
 
-        $to = "services@yvu.edu.in";
+        $to = "yvuitcell@gmail.com";
         $subject = "SERVICE REQUEST - " . $service;
 
         $message = "
