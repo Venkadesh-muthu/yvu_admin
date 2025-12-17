@@ -8,7 +8,7 @@
           <h2 class="fw-bold mb-0 text-primary">
             <i class="bi bi-speedometer2 me-2"></i>YVU Admin Dashboard
           </h2>
-          <span class="text-muted small">Welcome back, <?= esc(session('admin_name')) ?></span>
+          <span class="text-muted small">Welcome back, <?= esc(session('username')) ?></span>
         </div>
 
  

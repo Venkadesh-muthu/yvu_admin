@@ -1,10 +1,15 @@
+<?php $uri = service('uri'); ?>
+<?php $role = session()->get('user_type'); ?>
 <main class="main-content">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold">Updates</h2>
-      <a href="<?= base_url('updates/add') ?>" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Add Update
-      </a>
+      <?php if (in_array($role, ['admin'])): ?> 
+        <a href="<?= base_url('updates/add') ?>" class="btn btn-primary">
+          <i class="bi bi-plus-circle"></i> Add Update
+        </a>
+      <?php endif; ?>
+
     </div>
 
     <?php if (session()->getFlashdata('success')): ?>
@@ -14,7 +19,19 @@
     <?php endif; ?>
 
     <div class="card shadow-sm p-4">
-      <table id="articlesTable" class="table table-bordered align-middle">
+      <!-- 🔽 Top-left button -->
+      <div class="d-flex justify-content-start mb-3">
+          <?php if (in_array($role, ['super_admin'])): ?>
+              <a href="<?= base_url('updates/download') ?>"
+                class="btn btn-sm btn-success">
+                  <i class="bi bi-download"></i> Download
+              </a>
+          <?php endif; ?>
+      </div>
+
+
+      <table id="articlesTable" class="table table-bordered table-sm align-middle">
+
         <thead class="table-light">
           <tr>
             <th width="5%">#</th>
@@ -24,7 +41,10 @@
             <th>Start Date</th>
             <th>End Date</th>
             <th>Created At</th>
-            <th>Actions</th>
+            <th style="<?= in_array($role, ['super_admin']) ? 'display:none;' : '' ?>">
+                Actions
+            </th>
+
           </tr>
         </thead>
         <tbody>
@@ -87,16 +107,18 @@
                         <?= date('d M Y', strtotime($u['created_at'])) ?>
                     <?php endif; ?>
                 </td>
-                <td>
-                  <a href="<?= base_url('updates/edit/' . $u['id']) ?>" class="btn btn-sm btn-warning">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                  <a href="<?= base_url('updates/delete/' . $u['id']) ?>" 
-                     class="btn btn-sm btn-danger"
-                     onclick="return confirm('Are you sure you want to delete this update?');">
-                    <i class="bi bi-trash"></i>
-                  </a>
+                <td style="<?= in_array($role, ['super_admin']) ? 'display:none;' : '' ?>">
+                    <a href="<?= base_url('updates/edit/' . $u['id']) ?>" class="btn btn-sm btn-warning">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <a href="<?= base_url('updates/delete/' . $u['id']) ?>" 
+                      class="btn btn-sm btn-danger"
+                      onclick="return confirm('Are you sure?');">
+                      <i class="bi bi-trash"></i>
+                    </a>
                 </td>
+
               </tr>
             <?php endforeach; ?>
           <?php else: ?>

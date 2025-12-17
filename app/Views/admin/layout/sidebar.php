@@ -1,5 +1,5 @@
 <?php $uri = service('uri'); ?>
-<?php $role = session()->get('admin_role'); // 'admin' or 'newsadmin'?>
+<?php $role = session()->get('user_type'); // admin | newsadmin | super_admin?>
 
 <nav id="sidebar"
     class="offcanvas offcanvas-start d-lg-block border-end shadow-sm yvu-sidebar"
@@ -15,52 +15,78 @@
 
     <!-- 🔹 Sidebar Body -->
     <div class="offcanvas-body d-flex flex-column p-0 bg-white">
+
         <!-- 👤 Admin Profile -->
         <div class="text-center py-4 border-bottom bg-primary text-white">
             <img src="<?= base_url('admin-template/assets/yvu150a.gif') ?>"
                 class="rounded-circle border border-3 border-light mb-2 shadow-sm"
                 width="80" height="80" alt="Admin">
-            <h5 class="fw-bold mb-0"><?= session()->get('admin_name') ?? 'Admin' ?></h5>
+
+            <h5 class="fw-bold mb-0">
+                <?= session()->get('username') ?? 'Admin' ?>
+            </h5>
+
             <small class="text-light opacity-75">
-                <?= $role === 'admin' ? 'Administrator' : 'News Admin' ?>
+                <?php
+                    if ($role === 'super_admin') {
+                        echo 'Super Admin';
+                    } elseif ($role === 'admin') {
+                        echo 'Administrator';
+                    } elseif ($role === 'newsadmin') {
+                        echo 'News Admin';
+                    }
+?>
             </small>
+
         </div>
 
         <!-- 📋 Sidebar Menu -->
         <ul class="nav flex-column mt-3">
+
+            <!-- Dashboard (ALL) -->
             <li class="nav-item p-2">
                 <a href="<?= base_url('dashboard') ?>"
-                    class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'dashboard' ? 'active-link' : '' ?>">
+                   class="nav-link d-flex align-items-center px-4 py-2
+                   <?= $uri->getSegment(1) === 'dashboard' ? 'active-link' : '' ?>">
                     <i class="bi bi-speedometer2 me-2 fs-5"></i> Dashboard
                 </a>
             </li>
 
-            <?php if ($role === 'admin'): ?>
+            <!-- Updates (ADMIN ONLY) -->
+            <?php if ($role === 'admin' || $role === 'super_admin'): ?>
                 <li class="nav-item p-2">
                     <a href="<?= base_url('updates') ?>"
-                        class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'updates' ? 'active-link' : '' ?>">
+                       class="nav-link d-flex align-items-center px-4 py-2
+                       <?= $uri->getSegment(1) === 'updates' ? 'active-link' : '' ?>">
                         <i class="bi bi-arrow-repeat me-2 fs-5"></i> Updates
                     </a>
                 </li>
-            <?php elseif ($role === 'newsadmin'): ?>
+            <?php endif; ?>
+
+            <!-- Newspapers (NEWS ADMIN ONLY) -->
+            <?php if ($role === 'newsadmin'): ?>
                 <li class="nav-item p-2">
                     <a href="<?= base_url('newspapers') ?>"
-                        class="nav-link d-flex align-items-center px-4 py-2 <?= $uri->getSegment(1) === 'newspapers' ? 'active-link' : '' ?>">
+                       class="nav-link d-flex align-items-center px-4 py-2
+                       <?= $uri->getSegment(1) === 'newspapers' ? 'active-link' : '' ?>">
                         <i class="bi bi-file-earmark-text me-2 fs-5"></i> Newspapers
                     </a>
                 </li>
             <?php endif; ?>
+
         </ul>
 
         <!-- 🔒 Logout -->
         <div class="mt-auto border-top py-3 px-4">
             <a href="<?= base_url('logout') ?>"
-                class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
+               class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center">
                 <i class="bi bi-box-arrow-right me-2"></i> Logout
             </a>
         </div>
+
     </div>
 </nav>
+
 
 <!-- 🎨 Sidebar Styling -->
 <style>

@@ -18,6 +18,7 @@ $routes->get('logout', 'AdminController::logout');
 $routes->get('dashboard', 'AdminController::dashboard');
 
 $routes->get('updates', 'AdminController::updates'); // List all updates
+$routes->get('updates/download', 'AdminController::downloadUpdatesPdf');
 $routes->match(['get', 'post'], 'updates/add', 'AdminController::addUpdate'); // Add new update
 $routes->match(['get', 'post'], 'updates/edit/(:num)', 'AdminController::editUpdate/$1'); // Edit update
 $routes->get('updates/delete/(:num)', 'AdminController::deleteUpdate/$1'); // Delete update
@@ -38,6 +39,6 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], function ($routes)
     // 🔹 Newspapers (Public / API)
     $routes->get('newspapers', 'NewspaperController::getNewspapers');
     $routes->get('newspapers/(:num)', 'NewspaperController::getNewspaper/$1');
-    
+
     $routes->post('service-request', 'ServiceController::sendRequest');
 });

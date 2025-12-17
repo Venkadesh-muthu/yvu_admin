@@ -7,6 +7,10 @@ use App\Models\AdminModel;
 use App\Models\UpdateModel;
 use App\Models\NewspaperModel;
 
+require_once APPPATH . 'Libraries/dompdf/autoload.inc.php';
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 class AdminController extends BaseController
 {
     protected $adminModel;
@@ -36,7 +40,7 @@ class AdminController extends BaseController
         $session = session();
 
         $rules = [
-            'email' => 'required|valid_email',
+            'email'    => 'required|valid_email',
             'password' => 'required'
         ];
 
@@ -46,25 +50,41 @@ class AdminController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $email = $this->request->getPost('email');
+        $email    = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
-        $user = $this->adminModel->where('email', $email)->first();
+        $user = $this->adminModel
+            ->where('email', $email)
+            ->first();
 
-        if ($user && password_verify($password, $user['password'])) {
-            $session->set([
-                'isAdminLoggedIn' => true,
-                'admin_id' => $user['id'],
-                'admin_name' => $user['username'],
-                'admin_email' => $user['email'],
-                'admin_role' => $user['username'] === 'Admin' ? 'admin' : 'newsadmin'
-            ]);
+        if (!$user || !password_verify($password, $user['password'])) {
+            return redirect()->back()->with('error', 'Invalid email or password');
+        }
+
+        // ✅ Store session with user_type
+        $session->set([
+            'isAdminLoggedIn' => true,
+            'user_id'    => $user['id'],
+            'username'   => $user['username'],
+            'email'      => $user['email'],
+            'phone'      => $user['phone'],
+            'profile_pic' => $user['profile_pic'],
+
+            // IMPORTANT
+            'user_type'  => $user['user_type'], // super_admin | admin | newsadmin | user
+            'login_time' => date('Y-m-d H:i:s')
+        ]);
+
+        // ✅ Redirect based on user_type
+        if ($user['user_type'] === 'super_admin') {
+            return redirect()->to('/dashboard');
+        } elseif ($user['user_type'] === 'admin') {
+            return redirect()->to('/dashboard');
+        } elseif ($user['user_type'] === 'news_admin') {
             return redirect()->to('/dashboard');
         }
 
-
-
-        return redirect()->back()->with('error', 'Invalid email or password');
+        return redirect()->to('/dashboard');
     }
 
     public function logout()
@@ -72,12 +92,87 @@ class AdminController extends BaseController
         session()->destroy();
         return redirect()->to('/');
     }
+    public function downloadUpdatesPdf()
+    {
+        // 🔐 Allow only admin & super_admin
+        if (!in_array(session()->get('user_type'), ['admin', 'super_admin'])) {
+            return redirect()->to('updates')->with('error', 'Unauthorized');
+        }
 
+        // 📥 Get all updates
+        $updates = $this->updateModel
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+
+        // 🧱 Build HTML manually
+        $html = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
+            h3 { text-align: center; margin-bottom: 15px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; }
+            th { background-color: #f2f2f2; }
+        </style>
+    </head>
+    <body>
+        <h3>Updates Report</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+        $i = 1;
+        foreach ($updates as $u) {
+            $html .= '
+            <tr>
+                <td>' . $i++ . '</td>
+                <td>' . esc($u['heading']) . '</td>
+                <td>' . esc($u['type'] ?? '-') . '</td>
+                <td>' . (!empty($u['start_date']) ? date('d M Y', strtotime($u['start_date'])) : '-') . '</td>
+                <td>' . (!empty($u['end_date']) ? date('d M Y', strtotime($u['end_date'])) : '-') . '</td>
+                <td>' . date('d M Y', strtotime($u['created_at'])) . '</td>
+            </tr>';
+        }
+
+        $html .= '
+            </tbody>
+        </table>
+    </body>
+    </html>';
+
+        // ⚙ Dompdf setup
+        $options = new Options();
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        // 📤 Download PDF
+        return $dompdf->stream(
+            'updates_' . date('Ymd_His') . '.pdf',
+            ['Attachment' => true]
+        );
+    }
     // --------------------------------
     // 🧭 DASHBOARD
     // --------------------------------
     public function dashboard()
     {
+
         if ($redirect = $this->checkLogin()) {
             return $redirect;
         }
