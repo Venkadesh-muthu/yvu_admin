@@ -107,8 +107,8 @@
                             width="36" height="36" alt="Profile">
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                data-bs-target="#profileModal">Profile</a></li>
+                        <!-- <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                data-bs-target="#profileModal">Profile</a></li> -->
                         <li>
                             <a class="dropdown-item text-danger" href="<?= base_url('logout') ?>">
                                 <i class="bi bi-box-arrow-right me-2"></i> Logout

@@ -6,8 +6,6 @@ use App\Controllers\BaseController;
 use App\Models\AdminModel;
 use App\Models\UpdateModel;
 use App\Models\NewspaperModel;
-
-require_once APPPATH . 'Libraries/dompdf/autoload.inc.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
