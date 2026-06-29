@@ -4,21 +4,20 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class NewspaperModel extends Model
+class VisitorImageModel extends Model
 {
-    protected $table = 'newspapers'; // your table name
+    protected $table = 'visitor_images';
     protected $primaryKey = 'id';
 
-    // Add start_date and end_date here
     protected $allowedFields = [
-        'title',
-        'documents',
-        'publish_date',
+        'visitor_id',
+        'image',
+        'image_description',
         'created_at',
         'updated_at'
     ];
 
-    protected $useTimestamps = true; // automatically manage created_at & updated_at
+    protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 

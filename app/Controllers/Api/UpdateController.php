@@ -58,6 +58,39 @@ class UpdateController extends BaseController
 
 
     // ✅ Fetch a single update by ID
+    // Fetch all entered updates without filtering by start/end date
+    public function getAllUpdates()
+    {
+        $updates = $this->updateModel
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        $updates = array_map(function ($item) {
+            $files = json_decode($item['documents'] ?? '[]', true);
+            $fileUrls = [];
+
+            foreach ($files as $file) {
+                $fileUrls[] = base_url('uploads/updates/' . rawurlencode($file));
+            }
+
+            return [
+                'id'         => $item['id'],
+                'heading'    => $item['heading'],
+                'type'       => $item['type'] ?? null,
+                'documents'  => $fileUrls,
+                'start_date' => $item['start_date'] ?? null,
+                'end_date'   => $item['end_date'] ?? null,
+                'created_at' => $item['created_at'] ?? null,
+                'updated_at' => $item['updated_at'] ?? null,
+            ];
+        }, $updates);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data'   => $updates
+        ]);
+    }
+
     public function getUpdate($id)
     {
         $update = $this->updateModel->find($id);

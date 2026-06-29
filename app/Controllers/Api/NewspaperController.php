@@ -18,20 +18,69 @@ class NewspaperController extends BaseController
         $this->newspaperModel = new NewspaperModel();
     }
 
-    // ✅ Fetch all newspapers
+    // ✅ Fetch all newspapers (Expire after 7 days)
     public function getNewspapers()
     {
         $today = date('Y-m-d');
 
-        // Fetch with date filter including NULL dates
         $newspapers = $this->newspaperModel
-            ->where("(start_date IS NULL OR start_date <= '$today')")
-            ->where("(end_date IS NULL OR end_date >= '$today')")
+            ->groupBy('id')
             ->orderBy('id', 'DESC')
             ->findAll();
 
-        // Format document URLs for API
-        $newspapers = array_map(function ($item) {
+        $newspapers = array_filter($newspapers, function ($item) use ($today) {
+            $createdAt = $item['created_at'] ?? null;
+            if (!$createdAt) {
+                return false;
+            }
+
+            $expireDate = date('Y-m-d', strtotime($createdAt . ' +7 days'));
+            return $expireDate >= $today;
+        });
+
+        $newspapers = array_values(array_map(function ($item) {
+
+            $files = json_decode($item['documents'] ?? '[]', true);
+            $fileUrls = [];
+
+            foreach ($files as $file) {
+                $fileUrls[] = base_url('uploads/newspapers/' . rawurlencode($file));
+            }
+
+            $createdAt = $item['created_at'] ?? null;
+            $expiresAt = $createdAt
+                ? date('Y-m-d', strtotime($createdAt . ' +7 days'))
+                : null;
+
+            return [
+                'id'         => $item['id'],
+                'title'      => $item['title'], // ✅ IMPORTANT
+                'publish_date' => $item['publish_date'],
+                'documents'  => $fileUrls,
+                'created_at' => $createdAt,
+                'updated_at' => $item['updated_at'] ?? null,
+                'expires_at' => $expiresAt,
+            ];
+        }, $newspapers));
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data'   => $newspapers
+        ]);
+    }
+
+    public function allNewspapers()
+    {
+        // Fetch all newspapers
+        $newspapers = $this->newspaperModel
+            ->groupBy('id')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        // Format response
+        $newspapers = array_values(array_map(function ($item) {
+
+            // Decode documents
             $files = json_decode($item['documents'] ?? '[]', true);
             $fileUrls = [];
 
@@ -40,14 +89,14 @@ class NewspaperController extends BaseController
             }
 
             return [
-                'id'         => $item['id'],
-                'documents'  => $fileUrls,
-                'start_date' => $item['start_date'] ?? null,
-                'end_date'   => $item['end_date'] ?? null,
-                'created_at' => $item['created_at'] ?? null,
-                'updated_at' => $item['updated_at'] ?? null,
+                'id'           => $item['id'],
+                'title'        => $item['title'],
+                'publish_date' => $item['publish_date'],
+                'documents'    => $fileUrls,
+                'created_at'   => $item['created_at'],
+                'updated_at'   => $item['updated_at'] ?? null,
             ];
-        }, $newspapers);
+        }, $newspapers));
 
         return $this->response->setJSON([
             'status' => 'success',
@@ -75,13 +124,19 @@ class NewspaperController extends BaseController
             $fileUrls[] = base_url('uploads/newspapers/' . rawurlencode($file));
         }
 
+        $createdAt = $newspaper['created_at'] ?? null;
+        $expiresAt = $createdAt
+            ? date('Y-m-d', strtotime($createdAt . ' +7 days'))
+            : null;
+
         return $this->response->setJSON([
             'status' => 'success',
             'data'   => [
-                'id'        => $newspaper['id'],
-                'documents' => $fileUrls,
-                'created_at' => $newspaper['created_at'] ?? null,
+                'id'         => $newspaper['id'],
+                'documents'  => $fileUrls,
+                'created_at' => $createdAt,
                 'updated_at' => $newspaper['updated_at'] ?? null,
+                'expires_at' => $expiresAt, // ✅ new field
             ]
         ]);
     }

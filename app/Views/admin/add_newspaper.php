@@ -29,10 +29,39 @@
 
       <?= csrf_field() ?>
 
+      <!-- 🔹 Newspaper Title -->
+      <div class="mb-3">
+        <label for="title" class="form-label fw-semibold">
+          Newspaper Title
+        </label>
+        <input 
+          type="text" 
+          name="title" 
+          id="title" 
+          class="form-control"
+          value="<?= set_value('title') ?>"
+          placeholder="Enter newspaper title"
+          required>
+      </div>
+
+      <!-- 🔹 Publish Date -->
+      <div class="mb-3">
+        <label for="publish_date" class="form-label fw-semibold">
+          Publish Date <span class="text-danger">*</span>
+        </label>
+        <input 
+          type="date" 
+          name="publish_date" 
+          id="publish_date"
+          class="form-control"
+          value="<?= set_value('publish_date', date('Y-m-d')) ?>"
+          required>
+      </div>
+
       <!-- 🔹 Upload Images -->
       <div class="mb-3">
         <label for="attachments" class="form-label fw-semibold">
-          Upload Images<span class="text-danger">*</span>
+          Upload Images <span class="text-danger">*</span>
         </label>
         <input 
           type="file" 
@@ -44,34 +73,6 @@
           required>
       </div>
 
-      <!-- 🔹 Start Date -->
-      <div class="mb-3">
-        <label for="start_date" class="form-label fw-semibold">
-          Start Date<span class="text-danger">*</span>
-        </label>
-        <input 
-          type="date" 
-          name="start_date" 
-          id="start_date" 
-          class="form-control"
-          value="<?= set_value('start_date') ?>" 
-          required>
-      </div>
-
-      <!-- 🔹 End Date -->
-      <div class="mb-3">
-        <label for="end_date" class="form-label fw-semibold">
-          End Date<span class="text-danger">*</span>
-        </label>
-        <input 
-          type="date" 
-          name="end_date" 
-          id="end_date" 
-          class="form-control"
-          value="<?= set_value('end_date') ?>" 
-          required>
-      </div>
-
       <div class="text-end">
         <button type="submit" class="btn btn-primary">
           Save Newspaper
@@ -80,17 +81,3 @@
     </form>
   </div>
 </main>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const startInput = document.getElementById('start_date');
-    const endInput = document.getElementById('end_date');
-
-    startInput.addEventListener('change', function() {
-        const startDate = this.value;
-        endInput.min = startDate; // End date cannot be before start date
-        if (endInput.value < startDate) {
-            endInput.value = startDate; // Auto-update end date if invalid
-        }
-    });
-});
-</script>

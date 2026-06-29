@@ -18,26 +18,30 @@
 
         <!-- 👤 Admin Profile -->
         <div class="text-center py-4 border-bottom bg-primary text-white">
-            <img src="<?= base_url('admin-template/assets/yvu150a.gif') ?>"
+            <img src="<?= base_url('admin-template/assets/yvu150-150.png') ?>"
                 class="rounded-circle border border-3 border-light mb-2 shadow-sm"
                 width="80" height="80" alt="Admin">
 
             <h5 class="fw-bold mb-0">
                 <?= session()->get('username') ?? 'Admin' ?>
             </h5>
-
             <small class="text-light opacity-75">
                 <?php
                     if ($role === 'super_admin') {
                         echo 'Super Admin';
                     } elseif ($role === 'admin') {
                         echo 'Administrator';
-                    } elseif ($role === 'newsadmin') {
+                    } elseif ($role === 'news_admin') {
                         echo 'News Admin';
+                    } elseif ($role === 'gallery_admin') {
+                        echo 'Gallery Admin';
+                    } elseif ($role === 'visitors_admin') {
+                        echo 'Visitors Admin';
+                    } elseif ($role === 'vcs_programs_admin') {
+                        echo 'VC’s Programs Admin';
                     }
 ?>
             </small>
-
         </div>
 
         <!-- 📋 Sidebar Menu -->
@@ -64,7 +68,7 @@
             <?php endif; ?>
 
             <!-- Newspapers (NEWS ADMIN ONLY) -->
-            <?php if ($role === 'newsadmin'): ?>
+            <?php if ($role === 'news_admin'): ?>
                 <li class="nav-item p-2">
                     <a href="<?= base_url('newspapers') ?>"
                        class="nav-link d-flex align-items-center px-4 py-2
@@ -74,6 +78,43 @@
                 </li>
             <?php endif; ?>
 
+             <!-- Events (EVENT ADMIN ONLY) -->
+            <?php if ($role === 'news_admin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('events') ?>"
+                    class="nav-link d-flex align-items-center px-4 py-2
+                    <?= $uri->getSegment(1) === 'events' ? 'active-link' : '' ?>">
+                        <i class="bi bi-calendar-event me-2 fs-5"></i> Events
+                    </a>
+                </li>
+            <?php endif; ?>
+            <?php if ($role === 'gallery_admin' || $role === 'super_admin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('gallery') ?>"
+                    class="nav-link d-flex align-items-center px-4 py-2
+                    <?= $uri->getSegment(1) === 'gallery' ? 'active-link' : '' ?>">
+                        <i class="bi bi-images me-2 fs-5"></i> Gallery
+                    </a>
+                </li>
+            <?php endif; ?>
+            <?php if ($role === 'visitors_admin' || $role === 'super_admin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('visitors') ?>"
+                    class="nav-link d-flex align-items-center px-4 py-2
+                    <?= $uri->getSegment(1) === 'visitors' ? 'active-link' : '' ?>">
+                        <i class="bi bi-people me-2 fs-5"></i> Visitors
+                    </a>
+                </li> 
+            <?php endif; ?>
+            <?php if ($role === 'vcs_programs_admin' || $role === 'super_admin'): ?>
+                <li class="nav-item p-2">
+                    <a href="<?= base_url('vcs-programs') ?>"
+                    class="nav-link d-flex align-items-center px-4 py-2
+                    <?= $uri->getSegment(1) === 'vcs_programs' ? 'active-link' : '' ?>">
+                        <i class="bi bi-journal-album me-2 fs-5"></i> VC’s Programs
+                    </a>
+                </li>
+            <?php endif; ?>  
         </ul>
 
         <!-- 🔒 Logout -->

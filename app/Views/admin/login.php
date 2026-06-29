@@ -73,8 +73,8 @@
 
         <form method="POST" action="<?= base_url('login') ?>">
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" id="email" class="form-control" placeholder="Enter email" required>
+                <label for="email" class="form-label">User Id</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="Enter User Id" required>
             </div>
 
             <div class="mb-3">
