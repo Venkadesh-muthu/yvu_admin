@@ -30,10 +30,12 @@ class AdminController extends BaseController
     protected $galleryImageModel;
     protected $vcsProgramModel;
     protected $vcsProgramImageModel;
+    private const MAX_LOGIN_ATTEMPTS = 5;
+    private const LOGIN_LOCK_SECONDS = 900;
 
     public function __construct()
     {
-        helper(['form', 'url']);
+        helper(['form', 'url', 'captcha']);
         $this->adminModel = new AdminModel();
         $this->visitorModel = new VisitorModel();
         $this->visitorImageModel = new VisitorImageModel();
@@ -60,10 +62,24 @@ class AdminController extends BaseController
     {
         helper(['form']);
         $session = session();
+        $email = (string) $this->request->getPost('email');
+
+        if ($this->isLoginLocked($email)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Too many failed login attempts. Please try again after 15 minutes.');
+        }
 
         $rules = [
-            'email'    => 'required|valid_email',
-            'password' => 'required'
+            'email'        => 'required|valid_email',
+            'password'     => 'required',
+            'captcha_code' => [
+                'rules'  => 'required|captcha',
+                'errors' => [
+                    'required' => 'Invalid CAPTCHA',
+                    'captcha'  => 'Invalid CAPTCHA',
+                ],
+            ],
         ];
 
         if (!$this->validate($rules)) {
@@ -72,7 +88,6 @@ class AdminController extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $email    = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
         $user = $this->adminModel
@@ -80,8 +95,12 @@ class AdminController extends BaseController
             ->first();
 
         if (!$user || !password_verify($password, $user['password'])) {
+            $this->recordFailedLogin($email);
             return redirect()->back()->with('error', 'Invalid email or password');
         }
+
+        $this->clearFailedLogins($email);
+        $session->regenerate(true);
 
         // ✅ Store session with user_type
         $session->set([
@@ -114,6 +133,47 @@ class AdminController extends BaseController
         session()->destroy();
         return redirect()->to('/');
     }
+
+    private function loginAttemptKey(string $email): string
+    {
+        $identifier = strtolower(trim($email));
+        $ip = $this->request->getIPAddress();
+
+        return 'login_attempts_' . sha1($ip . '|' . $identifier);
+    }
+
+    private function isLoginLocked(string $email): bool
+    {
+        $attempts = cache($this->loginAttemptKey($email));
+
+        return is_array($attempts)
+            && ($attempts['count'] ?? 0) >= self::MAX_LOGIN_ATTEMPTS
+            && ($attempts['locked_until'] ?? 0) > time();
+    }
+
+    private function recordFailedLogin(string $email): void
+    {
+        $key = $this->loginAttemptKey($email);
+        $attempts = cache($key);
+
+        if (! is_array($attempts)) {
+            $attempts = ['count' => 0, 'locked_until' => 0];
+        }
+
+        $attempts['count']++;
+
+        if ($attempts['count'] >= self::MAX_LOGIN_ATTEMPTS) {
+            $attempts['locked_until'] = time() + self::LOGIN_LOCK_SECONDS;
+        }
+
+        cache()->save($key, $attempts, self::LOGIN_LOCK_SECONDS);
+    }
+
+    private function clearFailedLogins(string $email): void
+    {
+        cache()->delete($this->loginAttemptKey($email));
+    }
+
     public function downloadUpdatesPdf()
     {
         // 🔐 Allow only admin & super_admin

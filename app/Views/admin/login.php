@@ -72,9 +72,11 @@
         <?php endif; ?>
 
         <form method="POST" action="<?= base_url('login') ?>">
+            <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="email" class="form-label">User Id</label>
-                <input type="email" name="email" id="email" class="form-control" placeholder="Enter User Id" required>
+                <input type="email" name="email" id="email" class="form-control" placeholder="Enter User Id"
+                    value="<?= old('email') ? esc(old('email'), 'attr') : '' ?>" required>
             </div>
 
             <div class="mb-3">
@@ -83,6 +85,18 @@
                 </label>
                 <input type="password" name="password" id="password" class="form-control" placeholder="Enter password"
                     required>
+            </div>
+
+            <div class="mb-3">
+                <label for="captcha_code" class="form-label">Enter CAPTCHA</label>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <?= captcha_image() ?>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="refresh-captcha">
+                        Refresh CAPTCHA
+                    </button>
+                </div>
+                <input type="text" name="captcha_code" id="captcha_code" class="form-control"
+                    placeholder="Enter CAPTCHA" autocomplete="off" required>
             </div>
 
             <div class="d-grid">
@@ -95,6 +109,13 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('refresh-captcha').addEventListener('click', function () {
+            const image = document.getElementById('captcha-image');
+            image.src = '<?= site_url('captcha/image') ?>?v=' + Date.now();
+            document.getElementById('captcha_code').value = '';
+        });
+    </script>
 </body>
 
 </html>

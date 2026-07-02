@@ -124,6 +124,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" action="<?= base_url('admin/profile/update') ?>" enctype="multipart/form-data"
                 class="modal-content">
+                <?= csrf_field() ?>
                 <div class="modal-header">
                     <h5 class="modal-title">Update Profile</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
